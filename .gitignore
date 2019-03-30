@@ -1,3 +1,5 @@
 *.o
 makefile
 *.amp
+*.srec
+*.axf

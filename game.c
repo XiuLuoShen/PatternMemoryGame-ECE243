@@ -19,8 +19,8 @@ void initializeBoard(unsigned boardSize, unsigned numOfTiles) {
     // Allocate memory
     GAME->board = (int**)malloc(boardSize*sizeof(int*));
     GAME->selectedTiles = (int**)malloc(boardSize*sizeof(int*));
-
-    for (int row = 0; row < boardSize; row++) {
+    int row = 0;
+    for (; row < boardSize; row++) {
         // Use calloc initialize them to 0
         GAME->board[row] = (int *)calloc(boardSize, sizeof(int));
         GAME->selectedTiles[row] = (int *)calloc(boardSize, sizeof(int));
@@ -28,7 +28,8 @@ void initializeBoard(unsigned boardSize, unsigned numOfTiles) {
     }
 
     // Set the random patterns
-    for (int i = 0; i < numOfTiles; i++) {
+    int i = 0;
+    for (; i < numOfTiles; i++) {
         int row = rand() % boardSize;
         int col = rand() % boardSize;
         while (GAME->board[row][col] == 1) {
@@ -40,7 +41,8 @@ void initializeBoard(unsigned boardSize, unsigned numOfTiles) {
 }
 
 void freeBoard(void) {
-    for (int row = 0; row < GAME->boardSize; row++) {
+    int row = 0;
+    for (; row < GAME->boardSize; row++) {
         free(GAME->board[row]);
     }
     free(GAME->board);
@@ -65,8 +67,10 @@ void selectTile(int row, int col) {
 // Checks if the level was passed
 ClickResult checkBoard(void) {
     unsigned correctTiles = 0;
-    for (unsigned row = 0; row < GAME->boardSize; row++) {
-        for (unsigned col = 0; col < GAME->boardSize; col++) {
+    unsigned row = 0;
+    for (; row < GAME->boardSize; row++) {
+        unsigned col = 0;
+        for (; col < GAME->boardSize; col++) {
             if (GAME->selectedTiles[row][col]) {
                 if (GAME->board[row][col] == 1) {
                     correctTiles++;

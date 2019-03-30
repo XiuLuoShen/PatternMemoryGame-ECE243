@@ -6,8 +6,10 @@
 // Draws the board and borders
 void drawBoard(void) {
     // Draw the top border?
-    for (int row = 0; row < GAME->boardSize; row++) {
-        for (int col = 0; col < GAME->boardSize; col++) {
+    int row = 0;
+    for (; row < GAME->boardSize; row++) {
+        int col = 0;
+        for (; col < GAME->boardSize; col++) {
 
         }
     }
@@ -31,8 +33,8 @@ void draw_line(int x0, int y0, int x1, int y1, short int color) {
     int y_step;
     if (y0 < y1)    y_step = 1;
     else        y_step = -1;
-
-    for (int x = x0 ; x <= x1; x++) {
+    int x = x0; 
+    for (; x <= x1; x++) {
         if (is_steep) {
             plot_pixel(y, x, color);
         }
@@ -48,16 +50,20 @@ void draw_line(int x0, int y0, int x1, int y1, short int color) {
 }
 
 void drawTile(int x, int y, int size, short int color) {
-    for (int row = x; row < x + size; row++) {
-        for (int col = y; col < y + size; col++) {
+    int row = x;
+    for (; row < x + size; row++) {
+        int col = y;
+        for (; col < y + size; col++) {
             plot_pixel(x, y, color);
         }
     }
 }
 
 void clear_screen(void){
-    for (int x = 0; x < 320; x++) {
-        for (int y = 0; y < 240; y++) {
+    int x = 0;
+    for (; x < 320; x++) {
+        int y = 0;
+        for (; y < 240; y++) {
             plot_pixel(x, y, 0x0);
         }
     }
