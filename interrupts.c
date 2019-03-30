@@ -1,5 +1,8 @@
 // Implementation of interrupts
+#include <stdlib.h>
+
 #include "interrupts.h"
+#include "game.h"
 #include "address_map_arm.h"
 
 void configA9Timer(void) {
@@ -20,8 +23,11 @@ void __attribute__((interrupt)) __cs3_isr_irq(void) {
     int interrupt_ID = *((int *)0xFFFEC10C);
     if (interrupt_ID == 73) // check if interrupt is from the KEYs
         pushbutton_ISR();
-    else
-        while (1); // if unexpected, then stay here
+    else {
+        // If unexpected, then clear the memory and stay here
+        free(GAME);
+        while (1);
+    }
     // Write to the End of Interrupt Register (ICCEOIR)
     *((int *)0xFFFEC110) = interrupt_ID;
 }
