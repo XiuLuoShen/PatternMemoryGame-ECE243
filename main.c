@@ -1,16 +1,36 @@
 #include <stdlib.h>
 
 #include "address_map_arm.h"
+#include "game.h"
 #include "interrupts.h"
 #include "draw.h"
 
-
+void initializeBuffers(void);
 void wait_for_vsync(void);
 
 // Global variables
-volatile int pixel_buffer_start; // global variable
+volatile int pixel_buffer_start; // global variable from draw.h
+Game* GAME; // from game.h
 
 int main(void) {
+    volatile int * pixel_ctrl_ptr = (int *)0xFF203020;
+    initializeBuffers();
+
+    // Allocate the memory for the game struct
+    GAME = (Game*) malloc(sizeof(Game));
+    GAME->lives = 3;
+    GAME->level = 1;
+    
+
+
+
+    // Free memory used for the game struct, memory for board freed already
+    free(GAME);
+
+    return 0;
+}
+
+void initializeBuffers(void) {
     volatile int * pixel_ctrl_ptr = (int *)0xFF203020;
     /* set front pixel buffer to start of FPGA On-chip memory */
     *(pixel_ctrl_ptr + 1) = 0xC8000000; // first store the address in the
@@ -23,11 +43,7 @@ int main(void) {
     /* set back pixel buffer to start of SDRAM memory */
     *(pixel_ctrl_ptr + 1) = 0xC0000000;
     pixel_buffer_start = *(pixel_ctrl_ptr + 1); // we draw on the back buffer
-
-
-    return 0;
 }
-
 
 void wait_for_vsync(void) {
     // pixel controller
