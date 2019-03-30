@@ -4,13 +4,73 @@
 
 
 // Draws the board and borders
-void drawBoard(void) {
+void drawBoard(int playersTurn) {
     // Draw the top border?
-    int row = 0;
-    for (; row < GAME->boardSize; row++) {
-        int col = 0;
-        for (; col < GAME->boardSize; col++) {
+    draw_board_background();
 
+
+    int size = GAME->boardSize;;
+    int borderWidth = 3;
+    int xPos = 39 + borderWidth;
+    int yPos = borderWidth;
+    int squareSize = (240 - borderWidth*(GAME->boardSize + 1)) / GAME->boardSize;
+
+    int row = 0;
+    for (; row < size; row++) {
+        int col = 0;
+        for (; col < size; col++) {
+            //color choices: the tile is inactive
+            // the tile is selected (showing the pattern or it has been correctly selected)
+            // the tile is incorrectly selected
+            short int color;
+
+            // the player is selecting the tiles
+            if(playersTurn == 1 ){
+              if(GAME->selectedTiles[row][col] == 0){
+                color = unselectedColor;
+              }
+              else if (GAME->selectedTiles[row][col] == 1){
+                color = correctColor;
+              }
+              else if(GAME->selectedTiles[row][col] == 2){
+                color = wrongColor;
+              }
+            }
+            else{ // the pattern is being shown
+              if(GAME->board[row][col]){
+                color = correctColor;
+              }
+              else{
+                color = unselectedColor;
+              }
+            }
+
+            drawTile(xPos, yPos, squareSize, color);
+            yPos = yPos + borderWidth + squareSize;
+        }
+        xPos = xPos + borderWidth + squareSize;
+    }
+}
+
+//draws a 240x240 blue background in the center of the screen
+void draw_board_background(void){
+  int x = 39;
+  for (; x < 280; x++) {
+      int y = 0;
+      for (; y < 240; y++) {
+          plot_pixel(x, y,backgroundColor);
+      }
+    }
+}
+
+//draws the tiles of the board, and their respective colors corresponding to status
+//starting from top left corner
+void drawTile(int x, int y, int size, short int color);{
+    int row = x;
+    for(; row < row +size; row++){
+        int col = y;
+        for(; col < col+size; col ++){
+          plot_pixel(row, col, color);
         }
     }
 }
@@ -33,7 +93,7 @@ void draw_line(int x0, int y0, int x1, int y1, short int color) {
     int y_step;
     if (y0 < y1)    y_step = 1;
     else        y_step = -1;
-    int x = x0; 
+    int x = x0;
     for (; x <= x1; x++) {
         if (is_steep) {
             plot_pixel(y, x, color);
@@ -64,7 +124,7 @@ void clear_screen(void){
     for (; x < 320; x++) {
         int y = 0;
         for (; y < 240; y++) {
-            plot_pixel(x, y, 0x0);
+            plot_pixel(x, y, 0x00);
         }
     }
 }

@@ -62,7 +62,14 @@ int main(void) {
         // Poll for mouse info?
     }
 
+    // //TESTING DRAWING
+    // initializeBoard(3,0);
+    // GAME->selectedTiles[0][0] = 1;
+    // GAME->selectedTiles[0][1] = 0;
+    // GAME->selectedTiles[0][2] = 2;
+    // drawBoard(1);
 
+    wait_for_vsync();
     // Free memory used for the game struct, memory for board freed already
     free(GAME);
 
