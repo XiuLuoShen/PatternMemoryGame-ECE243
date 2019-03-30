@@ -1,5 +1,8 @@
 // Implementation of interrupts
+#include <stdlib.h>
+
 #include "interrupts.h"
+#include "game.h"
 #include "address_map_arm.h"
 
 void configA9Timer(void) {
@@ -12,16 +15,98 @@ void configA9Timer(void) {
 }
 
 
-/*************** The code below was taking from the Using_GIC.pdf handout **********************/
+void configMouse(void) {
+    volatile int * PS2Ptr = (int *) 0xFF200100;
+
+    // Reset the mouse
+    *PS2Ptr = 0xFF;
+    unsigned char temp = (*PS2Ptr);
+    while (temp != 0xAA) {
+        temp = (*PS2Ptr);
+    }
+
+    // Enable Interrupts
+    *(PS2Ptr + 1) = 0x1;
+
+    // Enable data sending
+    *PS2Ptr = 0xF4;
+}
+
+void mouseISR(void) {
+    // Check that there are only 3 packets
+    volatile int * PS2Ptr = (int *) 0xFF200100;
+
+    volatile int packet = *PS2Ptr;
+
+    unsigned char packet0 = packet & 0xFF;
+    while (packet >> 16 != 0) {
+        int packetNumber = packet >> 16 % 3;
+        unsigned char data = packet & 0xFF;
+        if (packetNumber == 0) {
+            packet0 = data & 0xFF;
+            // If left mouse button was clicked
+            if (packet0 & 0x01) {
+                mouseClicked = 1;
+            }
+        }
+        else if (packetNumber == 1) {
+            // packet0 contains the sign of the x movement in bit 4, so we shift it left by 4 and then shift it right by 8
+            if ((packet0 >> 4 & 0b1) == 1) {
+                // Get magnitude and then subtract
+                unsigned xChange = data^0xFF;
+                xChange += 1;
+                xPos -= xChange;
+            }
+            else {
+                xPos += data;
+            }
+        }
+        else if (packetNumber == 2) {
+            // Packet 0 contains sign of the y movement in bit 5 so we shift it left by 3
+            if ((packet0 >> 5 & 0b1) == 1) {
+                // Get magnitude and then subtract
+                unsigned yChange = data^0xFF;
+                yChange += 1;
+                yPos -= yChange;
+            }
+            else {
+                yPos += data;
+            }
+        }
+    }
+
+    if (xPos < 0) {
+        xPos = 0;
+    }
+    else if (xPos > 320) {
+        xPos = 320;
+    }
+
+    if (yPos < 0) {
+        yPos = 0;
+    }
+    else if (yPos > 240) {
+        yPos = 240;
+    }
+}
+
+/*************** The code below was taken from the Using_GIC.pdf handout **********************/
 
 // Define the IRQ exception handler
 void __attribute__((interrupt)) __cs3_isr_irq(void) {
     // Read the ICCIAR from the CPU Interface in the GIC
     int interrupt_ID = *((int *)0xFFFEC10C);
-    if (interrupt_ID == 73) // check if interrupt is from the KEYs
+    if (interrupt_ID == 73) { // check if interrupt is from the KEYs
         pushbutton_ISR();
-    else
-        while (1); // if unexpected, then stay here
+    }
+    else if (interrupt_ID == PS2_BASE) {
+        mouseISR();
+    }
+    else {
+        // If unexpected, then clear the memory and stay here
+        free(GAME);
+        while (1);
+    }
     // Write to the End of Interrupt Register (ICCEOIR)
     *((int *)0xFFFEC110) = interrupt_ID;
 }

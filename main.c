@@ -11,8 +11,21 @@ void wait_for_vsync(void);
 // Global variables
 volatile int pixel_buffer_start; // global variable from draw.h
 Game* GAME; // from game.h
+volatile int xPos;
+volatile int yPos;
+volatile int mouseClicked;
 
 int main(void) {
+    volatile int* ledr = (int *) 0xFF200000;
+    xPos = 160;
+    yPos = 120;
+
+    disable_A9_interrupts(); // disable interrupts in the A9 processor
+    set_A9_IRQ_stack(); // initialize the stack pointer for IRQ mode
+    config_GIC(); // configure the general interrupt controller
+    configMouse();
+
+    // Configure VGA stuff
     volatile int * pixel_ctrl_ptr = (int *)0xFF203020;
     initializeBuffers();
 
@@ -20,12 +33,39 @@ int main(void) {
     GAME = (Game*) malloc(sizeof(Game));
     GAME->lives = 3;
     GAME->level = 1;
-    
+    initializeBoard(3, 3);
 
+    enable_A9_interrupts(); // enable interrupts in the A9 processor
+
+
+    // Main game loop
+    while (1) {
+        clear_screen();
+        plot_pixel(xPos, yPos, 0xFF);
+        if (mouseClicked == 1) {
+            *ledr = 0x1FF;
+            mouseClicked = 0;
+        }
+        else {
+            *ledr = 0;
+        }
+
+        wait_for_vsync(); // swap front and back buffers on VGA vertical sync
+        pixel_buffer_start = *(pixel_ctrl_ptr + 1); // new back buffer
+        // If statement to draw the pattern or the board
+
+        // Draw the pixel the mouse is at
+
+
+        // Draw the game board
+        // Draw the mouse
+        // Poll for mouse info?
+    }
 
 
     // Free memory used for the game struct, memory for board freed already
     free(GAME);
+
 
     return 0;
 }
