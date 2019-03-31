@@ -65,7 +65,7 @@ void draw_board_background(void){
 
 //draws the tiles of the board, and their respective colors corresponding to status
 //starting from top left corner
-void drawTile(int x, int y, int size, short int color);{
+void drawTile(int x, int y, int size, short int color){
     int row = x;
     for(; row < row +size; row++){
         int col = y;
@@ -109,15 +109,6 @@ void draw_line(int x0, int y0, int x1, int y1, short int color) {
     }
 }
 
-void drawTile(int x, int y, int size, short int color) {
-    int row = x;
-    for (; row < x + size; row++) {
-        int col = y;
-        for (; col < y + size; col++) {
-            plot_pixel(x, y, color);
-        }
-    }
-}
 
 void clear_screen(void){
     int x = 0;
