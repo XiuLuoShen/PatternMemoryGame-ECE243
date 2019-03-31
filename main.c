@@ -42,7 +42,7 @@ int main(void) {
     initializeBoard(3, 3);
 
     enable_A9_interrupts(); // enable interrupts in the A9 processor
-	
+
 	volatile int * PS2_ptr = (int *)PS2_BASE; // PS/2 port address
 	// *(PS2_ptr) = 0xF4;	// Enable data sending
 

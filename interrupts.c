@@ -1,5 +1,4 @@
 // Implementation of interrupts
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "interrupts.h"
@@ -23,7 +22,7 @@ void configMouse(void) {
 	*PS2_ptr = 0xE8;	// Set Resolution
 	*PS2_ptr = 0x00;	// Resolution
 	*PS2_ptr = 0xEA;
-	
+
     *(PS2_ptr + 1) = 0x1; /* write to the PS/2 Control register to enable interrupts */
 
 }
@@ -34,7 +33,7 @@ void mouseISR(void) {
     int PS2_data, RAVAIL;
 	PS2_data = *(PS2_ptr); // read the Data register in the PS/2 port
 	RAVAIL = (PS2_data & 0xFFFF0000) >> 16;			// extract the RAVAIL field
-	
+
 	// byteNumber = (RAVAIL-1) % 3;
 	// printf("Byte number %d\n", RAVAIL);
 	if (*(PS2_ptr) == 0xFA){
@@ -90,14 +89,14 @@ void mouseISR(void) {
 				}
 			 }
 		}
-		
+
 		if (xPos < 0) {
 			xPos = 0;
 		}
 		else if (xPos >= 320) {
 			xPos = 319;
 		}
-		
+
 		if (yPos < 0) {
 			yPos = 0;
 		}
