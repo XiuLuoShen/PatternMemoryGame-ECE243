@@ -10,8 +10,6 @@ void enable_A9_interrupts(void);
 void config_GIC(void);
 void config_interrupt(int N, int CPU_target);
 
-
-
 void pushbutton_ISR(void);
 
 // VGA: Self-explanatory
@@ -21,6 +19,13 @@ void configA9Timer(void);
 
 
 // MOUSE: User Input
+extern volatile int xPos;
+extern volatile int yPos;
+extern volatile int mouseClicked;
+extern volatile unsigned char byte1, byte2, byte3;
+extern volatile int byteNumber;
 
+void configMouse(void);
+void mouseISR(void);
 
 #endif // INTERRUPTS_H_

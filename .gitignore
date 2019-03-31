@@ -3,3 +3,4 @@ makefile
 *.amp
 *.srec
 *.axf
+main.axf.objdump

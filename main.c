@@ -11,8 +11,27 @@ void wait_for_vsync(void);
 // Global variables
 volatile int pixel_buffer_start; // global variable from draw.h
 Game* GAME; // from game.h
+volatile int xPos;
+volatile int yPos;
+volatile int mouseClicked;
+volatile int byteNumber;
+volatile unsigned char byte1, byte2, byte3;
 
 int main(void) {
+    volatile int* ledr = (int *) 0xFF200000;
+    xPos = 160;
+    yPos = 120;
+    byteNumber = 0;
+    byte1 = 0;
+    byte2 = 0;
+    byte3 = 0;
+
+    disable_A9_interrupts(); // disable interrupts in the A9 processor
+    set_A9_IRQ_stack(); // initialize the stack pointer for IRQ mode
+    config_GIC(); // configure the general interrupt controller
+    configMouse();
+
+    // Configure VGA stuff
     volatile int * pixel_ctrl_ptr = (int *)0xFF203020;
     initializeBuffers();
 
@@ -20,12 +39,51 @@ int main(void) {
     GAME = (Game*) malloc(sizeof(Game));
     GAME->lives = 3;
     GAME->level = 1;
-    
+    initializeBoard(3, 3);
+
+    enable_A9_interrupts(); // enable interrupts in the A9 processor
+	
+	volatile int * PS2_ptr = (int *)PS2_BASE; // PS/2 port address
+	// *(PS2_ptr) = 0xF4;	// Enable data sending
+
+    // Main game loop
+    while (1) {
+		// byteNumber = -1;
+		*PS2_ptr = 0xEB;
+        clear_screen();
+        // plot_pixel(xPos, yPos, 0xFF);
+		drawTile(xPos, yPos, 3, 0xFFFF);
+        if (mouseClicked == 1) {
+            *ledr = 0x1FF;
+            mouseClicked = 0;
+        }
+        // else {
+            // *ledr = 0;
+        // }
+
+        wait_for_vsync(); // swap front and back buffers on VGA vertical sync
+        pixel_buffer_start = *(pixel_ctrl_ptr + 1); // new back buffer
+        // If statement to draw the pattern or the board
+
+        // Draw the pixel the mouse is at
 
 
+        // Draw the game board
+        // Draw the mouse
+        // Poll for mouse info?
+    }
 
+    // //TESTING DRAWING
+    initializeBoard(3,0);
+    GAME->selectedTiles[0][0] = 1;
+    GAME->selectedTiles[0][1] = 0;
+    GAME->selectedTiles[0][2] = 2;
+    drawBoard(1);
+
+    wait_for_vsync();
     // Free memory used for the game struct, memory for board freed already
     free(GAME);
+
 
     return 0;
 }
