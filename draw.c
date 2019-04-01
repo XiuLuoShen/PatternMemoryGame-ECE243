@@ -68,7 +68,6 @@ void draw_board_background(void){
 void drawTile(int x, int y, int size, short int color){
     int row = x;
     for(; row < x +size; row++){
-    for(; row < row +size; row++){
         int col = y;
         for(; col < y+size; col ++){
           plot_pixel(row, col, color);
