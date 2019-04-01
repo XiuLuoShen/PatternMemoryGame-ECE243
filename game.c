@@ -2,23 +2,45 @@
 
 #include "game.h"
 
+bool playerTurn;
+
 void restartGame(void) {
     // Free the board
-    freeBoard();
+    GAME->timesPlayedOnThisSize = 1;
     GAME->level = 1;
     GAME->lives = 3;
     GAME->wrongTiles = 0;
     GAME->currentTileX = 0;
     GAME->currentTileY = 0;
+    lost = false;
+    // freeBoard();
 
-    initialize(3, 3);
+    // Start game with board size 3x3 and 3 tiles
+    initializeBoard(3, 3);
+    playerTurn = false;
 }
 
-void nextLevel(unsigned level) {
+void newLevel(unsigned level) {
     // Free the board
     freeBoard();
-    GAME->level++;
+    // If level isn't being repeated, increment level and number of tiles to remember
+    if (GAME->level < level) {
+        GAME->level++;
+        GAME->numOfTiles++;
+        GAME->timesPlayedOnThisSize++;
+    }
+    // If we have played enough times with this board size
+    if (GAME->boardSize == GAME->timesPlayedOnThisSize) {
+        GAME->boardSize++;
+        GAME->timesPlayedOnThisSize = 1;
+    }
+
     GAME->wrongTiles = 0;
+    GAME->currentTileX = 0;
+    GAME->currentTileY = 0;
+    initializeBoard(GAME->boardSize, GAME->numOfTiles);
+    // Let the pattern be shown to the player
+    playerTurn = false;
 }
 
 void initializeBoard(unsigned boardSize, unsigned numOfTiles) {
@@ -67,6 +89,7 @@ void selectTile(int row, int col) {
         }
         else {
             GAME->selectedTiles[row][col] = 2;
+            GAME->wrongTiles++;
         }
     }
     return;

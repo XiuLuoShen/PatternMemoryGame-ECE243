@@ -1,7 +1,8 @@
-//
+// This file contains implementation for drawing
 #include "draw.h"
 #include "game.h"
 
+// TODO: Highlight selected square
 
 // Draws the board and borders
 void drawBoard(int playersTurn) {

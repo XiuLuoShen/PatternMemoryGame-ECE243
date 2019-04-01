@@ -11,74 +11,72 @@ void wait_for_vsync(void);
 // Global variables
 volatile int pixel_buffer_start; // global variable from draw.h
 Game* GAME; // from game.h
-volatile int xPos;
-volatile int yPos;
-volatile int mouseClicked;
-volatile int byteNumber;
-volatile unsigned char byte1, byte2, byte3;
-bool playerTurn = false;
 bool lost = false;
 
 int main(void) {
     volatile int* ledr = (int *) 0xFF200000;
-    xPos = 160;
-    yPos = 120;
-    byteNumber = 0;
-    byte1 = 0;
-    byte2 = 0;
-    byte3 = 0;
+
+    // Allocate the memory for the game struct and initialize
+    GAME = (Game*) malloc(sizeof(Game));
+    restartGame();
 
     disable_A9_interrupts(); // disable interrupts in the A9 processor
     set_A9_IRQ_stack(); // initialize the stack pointer for IRQ mode
     config_GIC(); // configure the general interrupt controller
-    configMouse();
+    configPS2();    // Configure the PS2 port
 
     // Configure VGA stuff
     volatile int * pixel_ctrl_ptr = (int *)0xFF203020;
     initializeBuffers();
 
-    // Allocate the memory for the game struct
-    GAME = (Game*) malloc(sizeof(Game));
-    GAME->lives = 3;
-    GAME->level = 1;
-    initializeBoard(3, 3);
-
     enable_A9_interrupts(); // enable interrupts in the A9 processor
-
-	volatile int * PS2_ptr = (int *)PS2_BASE; // PS/2 port address
-	// *(PS2_ptr) = 0xF4;	// Enable data sending
 
     // Main game loop
     while (1) {
-		// byteNumber = -1;
+        // Clear the screen
         clear_screen();
 
         // If statement to draw the pattern or the board
-
         drawBoard(playerTurn);
-        // Draw the pixel the mouse is at
 
+        if (lost) {
+            // Draw the lost/restart text
+        }
 
         // Draw the game board
-        // Draw the mouse
-        // Poll for mouse info?
         wait_for_vsync(); // swap front and back buffers on VGA vertical sync
         pixel_buffer_start = *(pixel_ctrl_ptr + 1); // new back buffer
+
+        // If the game has not been lost
+        if (!lost) {
+            // Check if pattern is being shown to player
+            if (!playerTurn) {
+                // Let the pattern be shown for 2s
+                delayms(2000);
+                playerTurn = true;
+            }
+            // Check if  level was passed
+            if (GAME->tilesFound == GAME->numOfTiles) {
+                delayms(300);
+                newLevel(GAME->level + 1);
+            }
+            // Check if level was failed
+            else if (GAME->wrongTiles >= 3) {
+                delayms(300);
+                GAME->lives--;
+                // Check if the game has been lost
+                if (GAME->lives == 0) {
+                    lost = true;
+                }
+                // If not lost the ntry the level again
+                else {
+                    newLevel(GAME->level);
+                }
+            }
+        }
     }
 
-    // // //TESTING DRAWING
-    // initializeBoard(3,0);
-    // GAME->selectedTiles[0][0] = 1;
-    // GAME->selectedTiles[0][1] = 0;
-    // GAME->selectedTiles[0][2] = 2;
-    // drawBoard(1);
-    //
-    // wait_for_vsync();
-    // Free memory used for the game struct, memory for board freed already
-    free(GAME);
-
-
-    return 0;
+   return 0;
 }
 
 void initializeBuffers(void) {
