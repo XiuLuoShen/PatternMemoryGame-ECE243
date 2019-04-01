@@ -66,10 +66,13 @@ void draw_board_background(void){
 //draws the tiles of the board, and their respective colors corresponding to status
 //starting from top left corner
 void drawTile(int x, int y, int size, short int color){
+void drawTile(int x, int y, int size, short int color);{
     int row = x;
     for(; row < x +size; row++){
+    for(; row < row +size; row++){
         int col = y;
         for(; col < y+size; col ++){
+        for(; col < col+size; col ++){
           plot_pixel(row, col, color);
         }
     }
@@ -109,6 +112,15 @@ void draw_line(int x0, int y0, int x1, int y1, short int color) {
     }
 }
 
+void drawTile(int x, int y, int size, short int color) {
+    int row = x;
+    for (; row < x + size; row++) {
+        int col = y;
+        for (; col < y + size; col++) {
+            plot_pixel(x, y, color);
+        }
+    }
+}
 
 void clear_screen(void){
     int x = 0;
@@ -142,4 +154,37 @@ int abs(int value) {
         value *= -1;
     }
     return value;
+}
+
+void find_selected_tile(int x, int y){
+    int size = GAME->boardSize;
+    borderWidth = 3;
+    int squareSize = (240 - borderWidth*(GAME->boardSize + 1)) / GAME->boardSize;
+
+    int selectedTileX = -1;
+    int selectedTileY = -1;
+    int i = 0;
+    for(; i < size; i++){
+        if(  ((i+1)*borderWidth + i*squareSize) < x && x < (i+1)*(borderWidth + squareSize)){
+            selectedTileX = i;
+
+        if(  ((i+1)*borderWidth + i*squareSize) < y && y < (i+1)*(borderWidth + squareSize)){
+            selectedTileY = i;
+        }
+    }
+
+    //did not click one of the tiles
+    if(selectedTileX == -1 || selectedTileY == -1){
+
+    }
+
+
+}
+
+void draw_text(int level, int lives){
+
+
+
+
+
 }
