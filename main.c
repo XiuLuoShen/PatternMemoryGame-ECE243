@@ -16,6 +16,8 @@ volatile int yPos;
 volatile int mouseClicked;
 volatile int byteNumber;
 volatile unsigned char byte1, byte2, byte3;
+bool playerTurn = false;
+bool lost = false;
 
 int main(void) {
     volatile int* ledr = (int *) 0xFF200000;
@@ -49,38 +51,29 @@ int main(void) {
     // Main game loop
     while (1) {
 		// byteNumber = -1;
-		*PS2_ptr = 0xEB;
         clear_screen();
-        // plot_pixel(xPos, yPos, 0xFF);
-		drawTile(xPos, yPos, 3, 0xFFFF);
-        if (mouseClicked == 1) {
-            *ledr = 0x1FF;
-            mouseClicked = 0;
-        }
-        // else {
-            // *ledr = 0;
-        // }
 
-        wait_for_vsync(); // swap front and back buffers on VGA vertical sync
-        pixel_buffer_start = *(pixel_ctrl_ptr + 1); // new back buffer
         // If statement to draw the pattern or the board
 
+        drawBoard(playerTurn);
         // Draw the pixel the mouse is at
 
 
         // Draw the game board
         // Draw the mouse
         // Poll for mouse info?
+        wait_for_vsync(); // swap front and back buffers on VGA vertical sync
+        pixel_buffer_start = *(pixel_ctrl_ptr + 1); // new back buffer
     }
 
-    // //TESTING DRAWING
-    initializeBoard(3,0);
-    GAME->selectedTiles[0][0] = 1;
-    GAME->selectedTiles[0][1] = 0;
-    GAME->selectedTiles[0][2] = 2;
-    drawBoard(1);
-
-    wait_for_vsync();
+    // // //TESTING DRAWING
+    // initializeBoard(3,0);
+    // GAME->selectedTiles[0][0] = 1;
+    // GAME->selectedTiles[0][1] = 0;
+    // GAME->selectedTiles[0][2] = 2;
+    // drawBoard(1);
+    //
+    // wait_for_vsync();
     // Free memory used for the game struct, memory for board freed already
     free(GAME);
 

@@ -1,6 +1,8 @@
 #ifndef GAME_H_   /* Include guard */
 #define GAME_H_
 
+#include <stdbool.h>
+
 typedef struct {
     // the board containing the pattern, 1 means the tile is part of the pattern
     int** board;
@@ -10,15 +12,19 @@ typedef struct {
     int** selectedTiles;
     unsigned boardSize;  // the size of the board
     unsigned numOfTiles; // the number of tiles in the pattern
-    unsigned tilesFound; // the number of tiles found in the pattern
+    unsigned tilesFound = 0; // the number of tiles found in the pattern
 
-    // The following data members may be unneccessary
+    int currentTileX = 0;
+    int currentTileY = 0;
+
     unsigned lives;  // lives left in this game
     unsigned level;  // current level
-    unsigned wrongTiles;      // the number of wrong tiles
+    unsigned wrongTiles = 0;      // the number of wrong tiles
 } Game;
 
 extern Game* GAME;
+extern bool playerTurn;
+extern bool lost;
 
 /**
  * The result that occurs when you click the tile
@@ -34,10 +40,11 @@ ClickResult checkBoard(void);
 // Selects a tile
 void selectTile(int row, int col);
 
+// Resets the game
 void restartGame(void);
 
-void startLevel(unsigned level);
-
+// Go to next level
+void nextLevel(unsigned level);
 
 // Initialize the game board
 void initializeBoard(unsigned boardSize, unsigned numOfTiles);

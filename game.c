@@ -3,12 +3,21 @@
 #include "game.h"
 
 void restartGame(void) {
+    // Free the board
+    freeBoard();
     GAME->level = 1;
     GAME->lives = 3;
+    GAME->wrongTiles = 0;
+    GAME->currentTileX = 0;
+    GAME->currentTileY = 0;
+
+    initialize(3, 3);
 }
 
-void startLevel(unsigned level) {
-    GAME->level = level;
+void nextLevel(unsigned level) {
+    // Free the board
+    freeBoard();
+    GAME->level++;
     GAME->wrongTiles = 0;
 }
 

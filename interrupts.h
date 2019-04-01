@@ -17,6 +17,9 @@ void pushbutton_ISR(void);
 // TIMER: Delays to show the pattern to the user
 void configA9Timer(void);
 
+// Keyboard
+void keyboardISR(void);
+
 
 // MOUSE: User Input
 extern volatile int xPos;
@@ -25,7 +28,7 @@ extern volatile int mouseClicked;
 extern volatile unsigned char byte1, byte2, byte3;
 extern volatile int byteNumber;
 
-void configMouse(void);
+void configPS2(void);
 void mouseISR(void);
 
 #endif // INTERRUPTS_H_

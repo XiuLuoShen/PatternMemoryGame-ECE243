@@ -1,10 +1,12 @@
 // Implementation of interrupts
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "interrupts.h"
 #include "game.h"
 #include "address_map_arm.h"
 
+// Configure timer
 void configA9Timer(void) {
     volatile int * timerPtr = (int *) 0xFFFEC600;
 
@@ -14,18 +16,92 @@ void configA9Timer(void) {
     *(timerPtr+2) |= 0b10;
 }
 
-
-void configMouse(void) {
+// Configure PS2
+void configPS2(void) {
     volatile int * PS2_ptr = (int *)PS2_BASE; // PS/2 port address
 
     *(PS2_ptr) = 0xFF; /* reset */
-	*PS2_ptr = 0xE8;	// Set Resolution
-	*PS2_ptr = 0x00;	// Resolution
-	*PS2_ptr = 0xEA;
+	// *PS2_ptr = 0xE8;	// Set Resolution
+	// *PS2_ptr = 0x00;	// Resolution
+	// *PS2_ptr = 0xEA;
 
     *(PS2_ptr + 1) = 0x1; /* write to the PS/2 Control register to enable interrupts */
 
 }
+
+// Interrupt routine for the keyboard
+void keyboardISR(void) {
+    volatile int * PS2_ptr = (int *) PS2_BASE;
+    int RVALID;
+    volatile char data;
+
+    if (RVALID) {
+        while (*(PS2_ptr+1) & 0x100) {
+            data = *PS2_ptr & 0xFF;
+            if (data == EXTENDED_KEYS) {
+                // Extended key press
+                data = *PS2_ptr & 0xFF;
+
+                bool keyReleased = false;
+                if (data == BREAK_CODE) {
+                    // Break data was sent
+                    keyReleased = true;
+                    data = *PS2_ptr & 0xFF;
+                }
+
+                if (keyReleased) {}
+                    if (data == RIGHT_ARROW) {
+                        // Right arrow pressed
+                        // Selected tile moves right
+                        GAME->currentTileX++;
+                        if (GAME->currentTileX >= GAME->boardSize) {
+                            GAME->currentTileX = 0;
+                        }
+                    }
+                    else if (data == LEFT_ARROW) {
+                        // Left arrow pressed
+                        // Selected tile moves left
+                        GAME->currentTileX--;
+                        if (GAME->currentTileX < 0) {
+                            GAME->currentTileX = GAME->boardSize - 1;
+                        }
+                    }
+                    else if (data == UP_ARROW) {
+                        // Up arrow pressed
+                        // Selected tile moves up
+                        GAME->currentTileY--;
+                        if (GAME->currentTileY < 0) {
+                            GAME->currentTileY = GAME->boardSize - 1;
+                        }
+                    }
+                    else if (data == DOWN_ARROW) {
+                        // Down arrow pressed
+                        // Selected tile moves down
+                        GAME->currentTileY++;
+                        if (GAME->currentTileY >= GAME->boardSize) {
+                            GAME->currentTileY = 0;
+                        }
+                    }
+                }
+            }
+            else {
+                // Non extended key press
+                bool keyReleased = false;
+                if (data == BREAK_CODE) {
+                    // Break data was sent
+                    keyReleased = true;
+                    data = *PS2_ptr & 0xFF:
+                }
+
+                if (keyReleased && data == ENTER_KEY) {
+                    // Enter key was pressed, select a tile
+                    selectTile(GAME->currentTileX, GAME->currentTileY);
+                }
+            }
+        }
+    }
+}
+
 
 void mouseISR(void) {
     // Check that there are only 3 packets
@@ -122,7 +198,7 @@ void __attribute__((interrupt)) __cs3_isr_irq(void) {
         pushbutton_ISR();
     }
     else if (interrupt_ID == 79) {
-        mouseISR();
+        keyboardISR();
     }
     else {
         // If unexpected, then clear the memory and stay here
