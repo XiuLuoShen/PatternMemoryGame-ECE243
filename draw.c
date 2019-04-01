@@ -70,7 +70,7 @@ void drawTile(int x, int y, int size, short int color){
     int row = x;
     for(; row < x +size; row++){
         int col = y;
-        for(; col < y+size; col ++){
+        for(; col < y+size; col++){
           plot_pixel(row, col, color);
         }
     }
@@ -110,16 +110,6 @@ void draw_line(int x0, int y0, int x1, int y1, short int color) {
     }
 }
 
-void drawTile(int x, int y, int size, short int color) {
-    int row = x;
-    for (; row < x + size; row++) {
-        int col = y;
-        for (; col < y + size; col++) {
-            plot_pixel(x, y, color);
-        }
-    }
-}
-
 void clear_screen(void){
     int x = 0;
     for (; x < 320; x++) {
@@ -154,30 +144,28 @@ int abs(int value) {
     return value;
 }
 
-void find_selected_tile(int x, int y){
-    int size = GAME->boardSize;
-    borderWidth = 3;
-    int squareSize = (240 - borderWidth*(GAME->boardSize + 1)) / GAME->boardSize;
-
-    int selectedTileX = -1;
-    int selectedTileY = -1;
-    int i = 0;
-    for(; i < size; i++){
-        if(  ((i+1)*borderWidth + i*squareSize) < x && x < (i+1)*(borderWidth + squareSize)){
-            selectedTileX = i;
-
-        if(  ((i+1)*borderWidth + i*squareSize) < y && y < (i+1)*(borderWidth + squareSize)){
-            selectedTileY = i;
-        }
-    }
-
-    //did not click one of the tiles
-    if(selectedTileX == -1 || selectedTileY == -1){
-
-    }
-
-
-}
+// void find_selected_tile(int x, int y){
+//     int size = GAME->boardSize;
+//     int borderWidth = 3;
+//     int squareSize = (240 - borderWidth*(GAME->boardSize + 1)) / GAME->boardSize;
+//
+//     int selectedTileX = -1;
+//     int selectedTileY = -1;
+//     int i = 0;
+//     for(; i < size; i++){
+//         if(  ((i+1)*borderWidth + i*squareSize) < x && x < (i+1)*(borderWidth + squareSize)){
+//             selectedTileX = i;
+//         }
+//         if(  ((i+1)*borderWidth + i*squareSize) < y && y < (i+1)*(borderWidth + squareSize)){
+//             selectedTileY = i;
+//         }
+//     }
+//
+//     //did not click one of the tiles
+//     if(selectedTileX == -1 || selectedTileY == -1){
+//
+//     }
+//     }
 
 void draw_text(int level, int lives){
 
