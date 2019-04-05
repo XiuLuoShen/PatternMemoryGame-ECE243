@@ -31,7 +31,9 @@ void delayms(int ms) {
     // Set enable
     *(timerPtr + 2) = 0b1;
     // Wait for the timer to count down, poll for the interrupt status
-    while (*(timerPtr+3) != 0b1);
+    while (*(timerPtr+3) != 0b1) {
+
+    }
     // Clear the interrupt flag
     *(timerPtr+3) = 0b1;
 

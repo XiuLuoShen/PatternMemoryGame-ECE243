@@ -68,7 +68,7 @@ int main(void) {
                 if (GAME->lives == 0) {
                     lost = true;
                 }
-                // If not lost the ntry the level again
+                // If not lost then try the level again
                 else {
                     newLevel(GAME->level);
                 }

@@ -12,12 +12,12 @@ void drawBoard(int playersTurn) {
 
     int size = GAME->boardSize;;
     int borderWidth = 3;
-    int xPos = 39 + borderWidth;
-    int yPos = borderWidth;
     int squareSize = (240 - borderWidth*(GAME->boardSize + 1)) / GAME->boardSize;
 
     int row = 0;
+    int yPos = borderWidth;
     for (; row < size; row++) {
+        int xPos = 39 + borderWidth;
         int col = 0;
         for (; col < size; col++) {
             //color choices: the tile is inactive
@@ -46,10 +46,18 @@ void drawBoard(int playersTurn) {
               }
             }
 
+            // Highlight the selected square
+            if (row == GAME->currentTileX && col == GAME->currentTileY) {
+                draw_line(xPos-1, yPos-1, xPos + squareSize + 1, yPos-1, 0xFF66);
+                draw_line(xPos-1, yPos + squareSize + 1, xPos + squareSize + 1, yPos + squareSize + 1, 0xFF66);
+                draw_line(xPos-1, yPos-1, xPos - 1, yPos + squareSize + 1, 0xFF66);
+                draw_line(xPos + squareSize + 1, yPos-1, xPos + squareSize + 1, yPos + squareSize + 1, 0xFF66);
+            }
+
             drawTile(xPos, yPos, squareSize, color);
-            yPos = yPos + borderWidth + squareSize;
+            xPos = xPos + borderWidth + squareSize;
         }
-        xPos = xPos + borderWidth + squareSize;
+        yPos = yPos + borderWidth + squareSize;
     }
 }
 
