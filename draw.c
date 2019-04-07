@@ -69,7 +69,7 @@ void drawTile(int x, int y, int size, short int color){
     int row = x;
     for(; row < x +size; row++){
         int col = y;
-        for(; col < y+size; col ++){
+        for(; col < y +size; col ++){
           plot_pixel(row, col, color);
         }
     }
