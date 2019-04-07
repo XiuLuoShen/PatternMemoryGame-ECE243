@@ -1,6 +1,9 @@
 *.o
 makefile
 *.amp
+.idea/
+*.xml
+*.objdump
+main.axf
 *.srec
-*.axf
-main.axf.objdump
+.idea/misc.xml

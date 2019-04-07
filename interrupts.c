@@ -1,9 +1,10 @@
-// Implementation of interrupts
+// Implementation of interrupts and use of devices
 #include <stdlib.h>
 #include <stdbool.h>
 
 #include "interrupts.h"
 #include "game.h"
+#include "keyboard_codes.h"
 #include "address_map_arm.h"
 
 // Configure timer
@@ -14,6 +15,29 @@ void configA9Timer(void) {
     *(timerPtr) = 400000000;
     // Make the timer reload the value
     *(timerPtr+2) |= 0b10;
+}
+
+// Delay using the timer
+void delayms(int ms) {
+    disable_A9_interrupts(); // disable interrupts in the A9 processor
+
+    volatile int * timerPtr = (int *) 0xFFFEC600;
+
+    // Load value
+    *(timerPtr) = ms * 200000;
+    // Current value
+    *(timerPtr+1) = ms * 200000;
+
+    // Set enable
+    *(timerPtr + 2) = 0b1;
+    // Wait for the timer to count down, poll for the interrupt status
+    while (*(timerPtr+3) != 0b1) {
+
+    }
+    // Clear the interrupt flag
+    *(timerPtr+3) = 0b1;
+
+    enable_A9_interrupts(); // enable interrupts in the A9 processor
 }
 
 // Configure PS2
@@ -29,15 +53,20 @@ void configPS2(void) {
 
 }
 
-// Interrupt routine for the keyboard
+
+/**
+ * Interrupt routine for the keyboard
+ * Only key releases are used for input
+ */
 void keyboardISR(void) {
     volatile int * PS2_ptr = (int *) PS2_BASE;
-    int RVALID;
+    volatile int readRegister = *PS2_ptr;
+    int RVALID = readRegister & 0x8000;
     volatile char data;
 
     if (RVALID) {
         while (*(PS2_ptr+1) & 0x100) {
-            data = *PS2_ptr & 0xFF;
+            data = readRegister& 0xFF;
             if (data == EXTENDED_KEYS) {
                 // Extended key press
                 data = *PS2_ptr & 0xFF;
@@ -49,7 +78,7 @@ void keyboardISR(void) {
                     data = *PS2_ptr & 0xFF;
                 }
 
-                if (keyReleased) {}
+                if (keyReleased && playerTurn) {
                     if (data == RIGHT_ARROW) {
                         // Right arrow pressed
                         // Selected tile moves right
@@ -90,12 +119,19 @@ void keyboardISR(void) {
                 if (data == BREAK_CODE) {
                     // Break data was sent
                     keyReleased = true;
-                    data = *PS2_ptr & 0xFF:
+                    data = *PS2_ptr & 0xFF;
                 }
 
                 if (keyReleased && data == ENTER_KEY) {
-                    // Enter key was pressed, select a tile
-                    selectTile(GAME->currentTileX, GAME->currentTileY);
+                    // Enter key was pressed
+                    // If still playing
+                    if (!lost) {
+                        selectTile(GAME->currentTileX, GAME->currentTileY);
+                    }
+                    else { // If game was lost, can restart by pressing enter
+                        freeBoard();
+                        restartGame();
+                    }
                 }
             }
         }
@@ -103,90 +139,90 @@ void keyboardISR(void) {
 }
 
 
-void mouseISR(void) {
-    // Check that there are only 3 packets
-    volatile int * PS2_ptr = (int *) 0xFF200100;
-    int PS2_data, RAVAIL;
-	PS2_data = *(PS2_ptr); // read the Data register in the PS/2 port
-	RAVAIL = (PS2_data & 0xFFFF0000) >> 16;			// extract the RAVAIL field
-
-	// byteNumber = (RAVAIL-1) % 3;
-	// printf("Byte number %d\n", RAVAIL);
-	if (*(PS2_ptr) == 0xFA){
-		byteNumber = 0;
-		return;
-	}
-
-	if (RAVAIL){
-        if (byteNumber == 0) {
-           byte1 = *(PS2_ptr) & 0xFF;
-           if (byte1 & 0x01) {
-               mouseClicked = 1;
-           }
-       }
-
-       // If X movement
-        if (byteNumber == 1) {
-             byte2 = *(PS2_ptr) & 0xFF;
-            // If no overflow
-             if (!(byte1 & 0x40)) {
-                 if (byte1 & 0x10) {
-                    // If negative, then subtract the magnitude of x movement
-					xPos -= (byte2 ^ 0xFF) + 1;
-					// if (byte2^0xFF > 4)
-						// xPos -= 2;
-                }
-                else {
-					// if (byte2 > 4)
-						// xPos += 2;
-					xPos += byte2;
-                }
-             }
-         }
-
-		// If Y movement
-		if (byteNumber == 2) {
-			byte3 = *(PS2_ptr) & 0xFF;
-			// If no overflow
-			 if (!(byte1 & 0x80)) {
-				if (byte1 & 0x20) {
-					// If negative, then subtract the magnitude of x movement
-					// Mouse movement up is positive, but on screen should be negative
-					// yPos += (unsigned)((byte2 ^ 0xFF) + 1);
-					// if ((byte3^0xFF) + 1 > 4)
-						// yPos += 2;
-					yPos += (unsigned)(byte3 ^ 0xFF) + 1;
-				}
-				else {
-					// yPos -= (unsigned)byte2;
-					// if (byte3 > 4)
-						// yPos -= 2;
-					yPos -= (unsigned) byte3;
-				}
-			 }
-		}
-
-		if (xPos < 0) {
-			xPos = 0;
-		}
-		else if (xPos >= 320) {
-			xPos = 319;
-		}
-
-		if (yPos < 0) {
-			yPos = 0;
-		}
-		else if (yPos >= 240) {
-			yPos = 239;
-		}
-
-		byteNumber++;
-		if (byteNumber == 3) {
-			byteNumber = 0;
-		}
-    }
-
-}
+//void mouseISR(void) {
+//    // Check that there are only 3 packets
+//    volatile int * PS2_ptr = (int *) 0xFF200100;
+//    int PS2_data, RAVAIL;
+//	PS2_data = *(PS2_ptr); // read the Data register in the PS/2 port
+//	RAVAIL = (PS2_data & 0xFFFF0000) >> 16;			// extract the RAVAIL field
+//
+//	// byteNumber = (RAVAIL-1) % 3;
+//	// printf("Byte number %d\n", RAVAIL);
+//	if (*(PS2_ptr) == 0xFA){
+//		byteNumber = 0;
+//		return;
+//	}
+//
+//	if (RAVAIL){
+//        if (byteNumber == 0) {
+//           byte1 = *(PS2_ptr) & 0xFF;
+//           if (byte1 & 0x01) {
+//               mouseClicked = 1;
+//           }
+//       }
+//
+//       // If X movement
+//        if (byteNumber == 1) {
+//             byte2 = *(PS2_ptr) & 0xFF;
+//            // If no overflow
+//             if (!(byte1 & 0x40)) {
+//                 if (byte1 & 0x10) {
+//                    // If negative, then subtract the magnitude of x movement
+//					xPos -= (byte2 ^ 0xFF) + 1;
+//					// if (byte2^0xFF > 4)
+//						// xPos -= 2;
+//                }
+//                else {
+//					// if (byte2 > 4)
+//						// xPos += 2;
+//					xPos += byte2;
+//                }
+//             }
+//         }
+//
+//		// If Y movement
+//		if (byteNumber == 2) {
+//			byte3 = *(PS2_ptr) & 0xFF;
+//			// If no overflow
+//			 if (!(byte1 & 0x80)) {
+//				if (byte1 & 0x20) {
+//					// If negative, then subtract the magnitude of x movement
+//					// Mouse movement up is positive, but on screen should be negative
+//					// yPos += (unsigned)((byte2 ^ 0xFF) + 1);
+//					// if ((byte3^0xFF) + 1 > 4)
+//						// yPos += 2;
+//					yPos += (unsigned)(byte3 ^ 0xFF) + 1;
+//				}
+//				else {
+//					// yPos -= (unsigned)byte2;
+//					// if (byte3 > 4)
+//						// yPos -= 2;
+//					yPos -= (unsigned) byte3;
+//				}
+//			 }
+//		}
+//
+//		if (xPos < 0) {
+//			xPos = 0;
+//		}
+//		else if (xPos >= 320) {
+//			xPos = 319;
+//		}
+//
+//		if (yPos < 0) {
+//			yPos = 0;
+//		}
+//		else if (yPos >= 240) {
+//			yPos = 239;
+//		}
+//
+//		byteNumber++;
+//		if (byteNumber == 3) {
+//			byteNumber = 0;
+//		}
+//    }
+//
+//}
 
 /*************** The code below was taken from the Using_GIC.pdf handout **********************/
 

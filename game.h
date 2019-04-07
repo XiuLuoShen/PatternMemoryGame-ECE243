@@ -4,6 +4,8 @@
 #include <stdbool.h>
 
 typedef struct {
+    unsigned level;  // current level
+    unsigned lives;  // lives left in this game
     // the board containing the pattern, 1 means the tile is part of the pattern
     int** board;
     /* the board containing the selected tiles
@@ -12,14 +14,13 @@ typedef struct {
     int** selectedTiles;
     unsigned boardSize;  // the size of the board
     unsigned numOfTiles; // the number of tiles in the pattern
-    unsigned tilesFound = 0; // the number of tiles found in the pattern
 
-    int currentTileX = 0;
-    int currentTileY = 0;
+    int currentTileX;
+    int currentTileY;
 
-    unsigned lives;  // lives left in this game
-    unsigned level;  // current level
-    unsigned wrongTiles = 0;      // the number of wrong tiles
+    unsigned tilesFound; // the number of tiles found in the pattern
+    unsigned timesPlayedOnThisSize;
+    unsigned wrongTiles;      // the number of wrong tiles
 } Game;
 
 extern Game* GAME;
@@ -44,7 +45,7 @@ void selectTile(int row, int col);
 void restartGame(void);
 
 // Go to next level
-void nextLevel(unsigned level);
+void newLevel(unsigned level);
 
 // Initialize the game board
 void initializeBoard(unsigned boardSize, unsigned numOfTiles);

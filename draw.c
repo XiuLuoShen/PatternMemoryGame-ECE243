@@ -1,7 +1,8 @@
-//
+// This file contains implementation for drawing
 #include "draw.h"
 #include "game.h"
 
+// TODO: Highlight selected square
 
 // Draws the board and borders
 void drawBoard(int playersTurn) {
@@ -11,12 +12,12 @@ void drawBoard(int playersTurn) {
 
     int size = GAME->boardSize;;
     int borderWidth = 3;
-    int xPos = 39 + borderWidth;
-    int yPos = borderWidth;
     int squareSize = (240 - borderWidth*(GAME->boardSize + 1)) / GAME->boardSize;
 
     int row = 0;
+    int yPos = borderWidth;
     for (; row < size; row++) {
+        int xPos = 39 + borderWidth;
         int col = 0;
         for (; col < size; col++) {
             //color choices: the tile is inactive
@@ -45,10 +46,18 @@ void drawBoard(int playersTurn) {
               }
             }
 
+            // Highlight the selected square
+            if (row == GAME->currentTileX && col == GAME->currentTileY) {
+                draw_line(xPos-1, yPos-1, xPos + squareSize + 1, yPos-1, 0xFF66);
+                draw_line(xPos-1, yPos + squareSize + 1, xPos + squareSize + 1, yPos + squareSize + 1, 0xFF66);
+                draw_line(xPos-1, yPos-1, xPos - 1, yPos + squareSize + 1, 0xFF66);
+                draw_line(xPos + squareSize + 1, yPos-1, xPos + squareSize + 1, yPos + squareSize + 1, 0xFF66);
+            }
+
             drawTile(xPos, yPos, squareSize, color);
-            yPos = yPos + borderWidth + squareSize;
+            xPos = xPos + borderWidth + squareSize;
         }
-        xPos = xPos + borderWidth + squareSize;
+        yPos = yPos + borderWidth + squareSize;
     }
 }
 
@@ -109,16 +118,6 @@ void draw_line(int x0, int y0, int x1, int y1, short int color) {
     }
 }
 
-void drawTile(int x, int y, int size, short int color) {
-    int row = x;
-    for (; row < x + size; row++) {
-        int col = y;
-        for (; col < y + size; col++) {
-            plot_pixel(x, y, color);
-        }
-    }
-}
-
 void clear_screen(void){
     int x = 0;
     for (; x < 320; x++) {
@@ -153,30 +152,28 @@ int abs(int value) {
     return value;
 }
 
-void find_selected_tile(int x, int y){
-    int size = GAME->boardSize;
-    borderWidth = 3;
-    int squareSize = (240 - borderWidth*(GAME->boardSize + 1)) / GAME->boardSize;
-
-    int selectedTileX = -1;
-    int selectedTileY = -1;
-    int i = 0;
-    for(; i < size; i++){
-        if(  ((i+1)*borderWidth + i*squareSize) < x && x < (i+1)*(borderWidth + squareSize)){
-            selectedTileX = i;
-
-        if(  ((i+1)*borderWidth + i*squareSize) < y && y < (i+1)*(borderWidth + squareSize)){
-            selectedTileY = i;
-        }
-    }
-
-    //did not click one of the tiles
-    if(selectedTileX == -1 || selectedTileY == -1){
-
-    }
-
-
-}
+// void find_selected_tile(int x, int y){
+//     int size = GAME->boardSize;
+//     int borderWidth = 3;
+//     int squareSize = (240 - borderWidth*(GAME->boardSize + 1)) / GAME->boardSize;
+//
+//     int selectedTileX = -1;
+//     int selectedTileY = -1;
+//     int i = 0;
+//     for(; i < size; i++){
+//         if(  ((i+1)*borderWidth + i*squareSize) < x && x < (i+1)*(borderWidth + squareSize)){
+//             selectedTileX = i;
+//         }
+//         if(  ((i+1)*borderWidth + i*squareSize) < y && y < (i+1)*(borderWidth + squareSize)){
+//             selectedTileY = i;
+//         }
+//     }
+//
+//     //did not click one of the tiles
+//     if(selectedTileX == -1 || selectedTileY == -1){
+//
+//     }
+//     }
 
 void draw_text(int level, int lives){
 

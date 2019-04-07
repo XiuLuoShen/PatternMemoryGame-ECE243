@@ -16,6 +16,7 @@ void pushbutton_ISR(void);
 
 // TIMER: Delays to show the pattern to the user
 void configA9Timer(void);
+void delayms(int ms);
 
 // Keyboard
 void keyboardISR(void);
