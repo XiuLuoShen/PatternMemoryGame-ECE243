@@ -59,73 +59,73 @@ extern volatile char keyByte1, keyByte2, keyByte3;
  * Interrupt routine for the keyboard
  * Only key releases are used for input
  */
-// void keyboardISR(void) {
-//     volatile int * PS2_ptr = (int *) 0xFF200100;		// PS/2 port address
-// 	int PS2_data, RAVAIL;
-//
-// 	PS2_data = *(PS2_ptr);									// read the Data register in the PS/2 port
-// 	RAVAIL = (PS2_data & 0xFFFF0000) >> 16;			// extract the RAVAIL field
-// 	if (RAVAIL > 0)
-// 	{
-// 		/* always save the last three bytes received */
-// 		keyByte1 = keyByte2;
-// 		keyByte2 = keyByte3;
-// 		keyByte3 = PS2_data & 0xFF;
-// 	}
-//
-//     if (keyByte1 == EXTENDED_KEYS) {
-//         if (keyByte2 == BREAK_CODE) {
-//             if (playerTurn) {
-//                 if (keyByte3 == RIGHT_ARROW) {
-//                     GAME->currentTileX++;
-//                     if (GAME->currentTileX >= GAME->boardSize) {
-//                         GAME->currentTileX = 0;
-//                     }
-//                 }
-//                 else if (keyByte3 == LEFT_ARROW) {
-//                     GAME->currentTileX--;
-//                     if (GAME->currentTileX < 0) {
-//                         GAME->currentTileX = GAME->boardSize - 1;
-//                     }
-//                 }
-//                 else if (keyByte3 == UP_ARROW) {
-//                     GAME->currentTileY--;
-//                     if (GAME->currentTileY < 0) {
-//                        GAME->currentTileY = GAME->boardSize - 1;
-//                     }
-//                 }
-//                 else if (keyByte3 == DOWN_ARROW) {
-//                     GAME->currentTileY++;
-//                     if (GAME->currentTileY >= GAME->boardSize) {
-//                         GAME->currentTileY = 0;
-//                     }
-//                 }
-//             }
-//         }
-//     }
-//     else if (keyByte2 == BREAK_CODE) {
-//         if (keyByte3 == ENTER_KEY) {
-//             if (!lost && started) {
-//                 selectTile(GAME->currentTileX, GAME->currentTileY);
-//             }
-//             else { // If game was lost, can restart by pressing enter
-//                 started = true;
-//                 freeBoard();
-//                 restartGame();
-//             }
-//         }
-//     }
-//     return;
-// }
-
-
 void keyboardISR(void) {
+    volatile int * PS2_ptr = (int *) 0xFF200100;		// PS/2 port address
+	int PS2_data, RAVAIL;
+
+	PS2_data = *(PS2_ptr); // read the Data register in the PS/2 port
+	RAVAIL = (PS2_data & 0xFFFF0000) >> 16;			// extract the RAVAIL field
+	if (RAVAIL > 0)
+	{
+		/* always save the last three bytes received */
+		keyByte1 = keyByte2;
+		keyByte2 = keyByte3;
+		keyByte3 = PS2_data & 0xFF;
+	}
+
+    if (keyByte1 == EXTENDED_KEYS) {
+        if (keyByte2 == BREAK_CODE) {
+            if (playerTurn) {
+                if (keyByte3 == RIGHT_ARROW) {
+                    GAME->currentTileX++;
+                    if (GAME->currentTileX >= GAME->boardSize) {
+                        GAME->currentTileX = 0;
+                    }
+                }
+                else if (keyByte3 == LEFT_ARROW) {
+                    GAME->currentTileX--;
+                    if (GAME->currentTileX < 0) {
+                        GAME->currentTileX = GAME->boardSize - 1;
+                    }
+                }
+                else if (keyByte3 == UP_ARROW) {
+                    GAME->currentTileY--;
+                    if (GAME->currentTileY < 0) {
+                       GAME->currentTileY = GAME->boardSize - 1;
+                    }
+                }
+                else if (keyByte3 == DOWN_ARROW) {
+                    GAME->currentTileY++;
+                    if (GAME->currentTileY >= GAME->boardSize) {
+                        GAME->currentTileY = 0;
+                    }
+                }
+            }
+        }
+    }
+    else if (keyByte2 == BREAK_CODE) {
+        if (keyByte3 == ENTER_KEY) {
+            if (!lost && started) {
+                selectTile(GAME->currentTileX, GAME->currentTileY);
+            }
+            else { // If game was lost, can restart by pressing enter
+                started = true;
+                freeBoard();
+                restartGame();
+            }
+        }
+    }
+    return;
+}
+
+
+/* void keyboardISR(void) {
     volatile int * PS2_ptr = (int *) PS2_BASE;
     volatile int readRegister;
     volatile int RVALID;
     volatile char data;
 
-    while (*(PS2_ptr+1) * 0x100) {
+    while (*(PS2_ptr+1) & 0x100) {
         do {
             readRegister = *PS2_ptr;
             RVALID = readRegister & 0x8000;
@@ -186,27 +186,17 @@ void keyboardISR(void) {
                 }
             }
         }
-        else if (data != EXTENDED_KEYS){
+        else if (data != EXTENDED_KEYS && data == BREAK_CODE){
             // Non extended key press
-            bool keyReleased = false;
+            // Break data was sent
             do {
                 readRegister = *PS2_ptr;
                 RVALID = readRegister & 0x8000;
             } while (!RVALID);
 
             data = readRegister & 0xFF;
-            if (data == BREAK_CODE) {
-                // Break data was sent
-                keyReleased = true;
-                do {
-                    readRegister = *PS2_ptr;
-                    RVALID = readRegister & 0x8000;
-                } while (!RVALID);
 
-                data = readRegister & 0xFF;
-            }
-
-            if (keyReleased && data == ENTER_KEY) {
+            if (data == ENTER_KEY) {
                 // Enter key was pressed
                 // If still playing
 
@@ -222,7 +212,7 @@ void keyboardISR(void) {
             }
         }
     }
-}
+} */
 
 
 

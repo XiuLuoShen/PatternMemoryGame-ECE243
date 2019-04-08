@@ -7,6 +7,7 @@ bool playerTurn;
 void restartGame(void) {
     // Free the board
     GAME->timesPlayedOnThisSize = 1;
+    GAME->tilesFound = 0;
     GAME->level = 1;
     GAME->lives = 3;
     GAME->wrongTiles = 0;
@@ -34,7 +35,7 @@ void newLevel(unsigned level) {
         GAME->boardSize++;
         GAME->timesPlayedOnThisSize = 1;
     }
-
+    GAME->tilesFound = 0;
     GAME->wrongTiles = 0;
     GAME->currentTileX = 0;
     GAME->currentTileY = 0;
@@ -63,7 +64,7 @@ void initializeBoard(unsigned boardSize, unsigned numOfTiles) {
             GAME->selectedTiles[row][col] = 0;
         }
     }
-    
+
     // Set the random patterns
     int i = 0;
     for (; i < numOfTiles; i++) {
@@ -88,7 +89,7 @@ void freeBoard(void) {
 
 void selectTile(int row, int col) {
     // Ensure that the tile hasn't already been selected
-    if (GAME->selectedTiles == 0) {
+    if (GAME->selectedTiles[row][col] == 0) {
         if (GAME->board[row][col] == 1) {
             GAME->selectedTiles[row][col] = 1;
             GAME->tilesFound++;

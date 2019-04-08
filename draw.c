@@ -79,7 +79,7 @@ void drawTile(int x, int y, int size, short int color){
     for(; row < x +size; row++){
         int col = y;
         for(; col < y +size; col ++){
-          plot_pixel(row, col, color);
+          plot_pixel(col, row, color);
         }
     }
 }
@@ -176,15 +176,15 @@ int abs(int value) {
 //     }
 
 void draw_text(int level, int lives){
+  int * character_buffer = (int *) 0xC9000000;
   char* levels_text = "Level \0";
   char* lives_text = "Lives \0";
 
   int y = 29;
   int x = 2;
 //Writes levels
-  int
   char* text_ptr = levels_text;
-  offset = (y << 7) + x;
+  int offset = (y << 7) + x;
   while (*(text_ptr)) {
     *(character_buffer + offset) = *(text_ptr); // write to the character buffer
     ++text_ptr;
@@ -194,9 +194,9 @@ void draw_text(int level, int lives){
   *(character_buffer + offset) = '0' + level;
 
   y = 30;
-  x = 2;
+  x = 1;
   //Writes lives
-  char* text_ptr = lives_text;
+  text_ptr = lives_text;
   offset = (y << 7) + x;
   while (*(text_ptr)) {
     *(character_buffer + offset) = *(text_ptr); // write to the character buffer
