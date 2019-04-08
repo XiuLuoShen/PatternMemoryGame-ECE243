@@ -47,7 +47,7 @@ void drawBoard(int playersTurn) {
             }
 
             // Highlight the selected square
-            if (row == GAME->currentTileX && col == GAME->currentTileY) {
+            if (row == GAME->currentTileY && col == GAME->currentTileX) {
                 draw_line(xPos-1, yPos-1, xPos + squareSize + 1, yPos-1, 0xFF66);
                 draw_line(xPos-1, yPos + squareSize + 1, xPos + squareSize + 1, yPos + squareSize + 1, 0xFF66);
                 draw_line(xPos-1, yPos-1, xPos - 1, yPos + squareSize + 1, 0xFF66);

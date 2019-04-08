@@ -26,7 +26,7 @@ void delayms(int ms) {
     // Load value
     *(timerPtr) = ms * 200000;
     // Current value
-    *(timerPtr+1) = ms * 200000;
+    // *(timerPtr+1) = ms * 2000000;
 
     // Set enable
     *(timerPtr + 2) = 0b1;
@@ -53,85 +53,171 @@ void configPS2(void) {
 
 }
 
+extern volatile char keyByte1, keyByte2, keyByte3;
 
 /**
  * Interrupt routine for the keyboard
  * Only key releases are used for input
  */
+// void keyboardISR(void) {
+//     volatile int * PS2_ptr = (int *) 0xFF200100;		// PS/2 port address
+// 	int PS2_data, RAVAIL;
+//
+// 	PS2_data = *(PS2_ptr);									// read the Data register in the PS/2 port
+// 	RAVAIL = (PS2_data & 0xFFFF0000) >> 16;			// extract the RAVAIL field
+// 	if (RAVAIL > 0)
+// 	{
+// 		/* always save the last three bytes received */
+// 		keyByte1 = keyByte2;
+// 		keyByte2 = keyByte3;
+// 		keyByte3 = PS2_data & 0xFF;
+// 	}
+//
+//     if (keyByte1 == EXTENDED_KEYS) {
+//         if (keyByte2 == BREAK_CODE) {
+//             if (playerTurn) {
+//                 if (keyByte3 == RIGHT_ARROW) {
+//                     GAME->currentTileX++;
+//                     if (GAME->currentTileX >= GAME->boardSize) {
+//                         GAME->currentTileX = 0;
+//                     }
+//                 }
+//                 else if (keyByte3 == LEFT_ARROW) {
+//                     GAME->currentTileX--;
+//                     if (GAME->currentTileX < 0) {
+//                         GAME->currentTileX = GAME->boardSize - 1;
+//                     }
+//                 }
+//                 else if (keyByte3 == UP_ARROW) {
+//                     GAME->currentTileY--;
+//                     if (GAME->currentTileY < 0) {
+//                        GAME->currentTileY = GAME->boardSize - 1;
+//                     }
+//                 }
+//                 else if (keyByte3 == DOWN_ARROW) {
+//                     GAME->currentTileY++;
+//                     if (GAME->currentTileY >= GAME->boardSize) {
+//                         GAME->currentTileY = 0;
+//                     }
+//                 }
+//             }
+//         }
+//     }
+//     else if (keyByte2 == BREAK_CODE) {
+//         if (keyByte3 == ENTER_KEY) {
+//             if (!lost && started) {
+//                 selectTile(GAME->currentTileX, GAME->currentTileY);
+//             }
+//             else { // If game was lost, can restart by pressing enter
+//                 started = true;
+//                 freeBoard();
+//                 restartGame();
+//             }
+//         }
+//     }
+//     return;
+// }
+
+
 void keyboardISR(void) {
     volatile int * PS2_ptr = (int *) PS2_BASE;
-    volatile int readRegister = *PS2_ptr;
-    int RVALID = readRegister & 0x8000;
+    volatile int readRegister;
+    volatile int RVALID;
     volatile char data;
 
-    if (RVALID) {
-        while (*(PS2_ptr+1) & 0x100) {
-            data = readRegister& 0xFF;
-            if (data == EXTENDED_KEYS) {
-                // Extended key press
-                data = *PS2_ptr & 0xFF;
+    while (*(PS2_ptr+1) * 0x100) {
+        do {
+            readRegister = *PS2_ptr;
+            RVALID = readRegister & 0x8000;
+        } while (!RVALID);
 
-                bool keyReleased = false;
-                if (data == BREAK_CODE) {
-                    // Break data was sent
-                    keyReleased = true;
-                    data = *PS2_ptr & 0xFF;
+        data = readRegister& 0xFF;
+        if (data == EXTENDED_KEYS) {
+            // Extended key press
+            do {
+                readRegister = *PS2_ptr;
+                RVALID = readRegister & 0x8000;
+            } while (!RVALID);
+            data = readRegister & 0xFF;
+
+            bool keyReleased = false;
+            if (data == BREAK_CODE) {
+                // Break data was sent
+                keyReleased = true;
+                do {
+                    readRegister = *PS2_ptr;
+                    RVALID = readRegister & 0x8000;
+                } while (!RVALID);
+                data = readRegister & 0xFF;
+            }
+
+            if (keyReleased && playerTurn) {
+                if (data == RIGHT_ARROW) {
+                    // Right arrow pressed
+                    // Selected tile moves right
+                    GAME->currentTileX++;
+                    if (GAME->currentTileX >= GAME->boardSize) {
+                        GAME->currentTileX = 0;
+                    }
                 }
-
-                if (keyReleased && playerTurn) {
-                    if (data == RIGHT_ARROW) {
-                        // Right arrow pressed
-                        // Selected tile moves right
-                        GAME->currentTileX++;
-                        if (GAME->currentTileX >= GAME->boardSize) {
-                            GAME->currentTileX = 0;
-                        }
+                else if (data == LEFT_ARROW) {
+                    // Left arrow pressed
+                    // Selected tile moves left
+                    GAME->currentTileX--;
+                    if (GAME->currentTileX < 0) {
+                        GAME->currentTileX = GAME->boardSize - 1;
                     }
-                    else if (data == LEFT_ARROW) {
-                        // Left arrow pressed
-                        // Selected tile moves left
-                        GAME->currentTileX--;
-                        if (GAME->currentTileX < 0) {
-                            GAME->currentTileX = GAME->boardSize - 1;
-                        }
+                }
+                else if (data == UP_ARROW) {
+                    // Up arrow pressed
+                    // Selected tile moves up
+                    GAME->currentTileY--;
+                    if (GAME->currentTileY < 0) {
+                        GAME->currentTileY = GAME->boardSize - 1;
                     }
-                    else if (data == UP_ARROW) {
-                        // Up arrow pressed
-                        // Selected tile moves up
-                        GAME->currentTileY--;
-                        if (GAME->currentTileY < 0) {
-                            GAME->currentTileY = GAME->boardSize - 1;
-                        }
-                    }
-                    else if (data == DOWN_ARROW) {
-                        // Down arrow pressed
-                        // Selected tile moves down
-                        GAME->currentTileY++;
-                        if (GAME->currentTileY >= GAME->boardSize) {
-                            GAME->currentTileY = 0;
-                        }
+                }
+                else if (data == DOWN_ARROW) {
+                    // Down arrow pressed
+                    // Selected tile moves down
+                    GAME->currentTileY++;
+                    if (GAME->currentTileY >= GAME->boardSize) {
+                        GAME->currentTileY = 0;
                     }
                 }
             }
-            else {
-                // Non extended key press
-                bool keyReleased = false;
-                if (data == BREAK_CODE) {
-                    // Break data was sent
-                    keyReleased = true;
-                    data = *PS2_ptr & 0xFF;
-                }
+        }
+        else if (data != EXTENDED_KEYS){
+            // Non extended key press
+            bool keyReleased = false;
+            do {
+                readRegister = *PS2_ptr;
+                RVALID = readRegister & 0x8000;
+            } while (!RVALID);
 
-                if (keyReleased && data == ENTER_KEY) {
-                    // Enter key was pressed
-                    // If still playing
-                    if (!lost) {
-                        selectTile(GAME->currentTileX, GAME->currentTileY);
-                    }
-                    else { // If game was lost, can restart by pressing enter
-                        freeBoard();
-                        restartGame();
-                    }
+            data = readRegister & 0xFF;
+            if (data == BREAK_CODE) {
+                // Break data was sent
+                keyReleased = true;
+                do {
+                    readRegister = *PS2_ptr;
+                    RVALID = readRegister & 0x8000;
+                } while (!RVALID);
+
+                data = readRegister & 0xFF;
+            }
+
+            if (keyReleased && data == ENTER_KEY) {
+                // Enter key was pressed
+                // If still playing
+
+                // if (!lost && started) {
+                if (!lost) {
+                    selectTile(GAME->currentTileX, GAME->currentTileY);
+                }
+                else { // If game was lost, can restart by pressing enter
+                    started = true;
+                    freeBoard();
+                    restartGame();
                 }
             }
         }
@@ -139,90 +225,6 @@ void keyboardISR(void) {
 }
 
 
-//void mouseISR(void) {
-//    // Check that there are only 3 packets
-//    volatile int * PS2_ptr = (int *) 0xFF200100;
-//    int PS2_data, RAVAIL;
-//	PS2_data = *(PS2_ptr); // read the Data register in the PS/2 port
-//	RAVAIL = (PS2_data & 0xFFFF0000) >> 16;			// extract the RAVAIL field
-//
-//	// byteNumber = (RAVAIL-1) % 3;
-//	// printf("Byte number %d\n", RAVAIL);
-//	if (*(PS2_ptr) == 0xFA){
-//		byteNumber = 0;
-//		return;
-//	}
-//
-//	if (RAVAIL){
-//        if (byteNumber == 0) {
-//           byte1 = *(PS2_ptr) & 0xFF;
-//           if (byte1 & 0x01) {
-//               mouseClicked = 1;
-//           }
-//       }
-//
-//       // If X movement
-//        if (byteNumber == 1) {
-//             byte2 = *(PS2_ptr) & 0xFF;
-//            // If no overflow
-//             if (!(byte1 & 0x40)) {
-//                 if (byte1 & 0x10) {
-//                    // If negative, then subtract the magnitude of x movement
-//					xPos -= (byte2 ^ 0xFF) + 1;
-//					// if (byte2^0xFF > 4)
-//						// xPos -= 2;
-//                }
-//                else {
-//					// if (byte2 > 4)
-//						// xPos += 2;
-//					xPos += byte2;
-//                }
-//             }
-//         }
-//
-//		// If Y movement
-//		if (byteNumber == 2) {
-//			byte3 = *(PS2_ptr) & 0xFF;
-//			// If no overflow
-//			 if (!(byte1 & 0x80)) {
-//				if (byte1 & 0x20) {
-//					// If negative, then subtract the magnitude of x movement
-//					// Mouse movement up is positive, but on screen should be negative
-//					// yPos += (unsigned)((byte2 ^ 0xFF) + 1);
-//					// if ((byte3^0xFF) + 1 > 4)
-//						// yPos += 2;
-//					yPos += (unsigned)(byte3 ^ 0xFF) + 1;
-//				}
-//				else {
-//					// yPos -= (unsigned)byte2;
-//					// if (byte3 > 4)
-//						// yPos -= 2;
-//					yPos -= (unsigned) byte3;
-//				}
-//			 }
-//		}
-//
-//		if (xPos < 0) {
-//			xPos = 0;
-//		}
-//		else if (xPos >= 320) {
-//			xPos = 319;
-//		}
-//
-//		if (yPos < 0) {
-//			yPos = 0;
-//		}
-//		else if (yPos >= 240) {
-//			yPos = 239;
-//		}
-//
-//		byteNumber++;
-//		if (byteNumber == 3) {
-//			byteNumber = 0;
-//		}
-//    }
-//
-//}
 
 /*************** The code below was taken from the Using_GIC.pdf handout **********************/
 
