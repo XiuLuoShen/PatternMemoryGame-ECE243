@@ -18,7 +18,6 @@ bool started = false;   // For when the program is loaded the first time
 char keyByte1, keyByte2, keyByte3;  // The bytes from the keyboard
 
 int main(void) {
-    volatile int* ledr = (int *) 0xFF200000;
 
     keyByte1 = 0;
     keyByte2 = 0;
@@ -66,7 +65,7 @@ int main(void) {
             continue;
         }
         // If the game has not been lost
-        else if (!lost) {
+        if (!lost) {
             // Check if pattern is being shown to player
             if (!playerTurn) {
                 // Let the pattern be shown for 2s

@@ -12,15 +12,15 @@ typedef struct {
      * 0 means unselected, 1 means correctly selected, 2 means wrongly selected
      */
     int** selectedTiles;
-    unsigned boardSize;  // the size of the board
-    unsigned numOfTiles; // the number of tiles in the pattern
+    volatile unsigned boardSize;  // the size of the board
+    volatile unsigned numOfTiles; // the number of tiles in the pattern
 
-    int currentTileX;
-    int currentTileY;
+    volatile int currentTileX;
+    volatile int currentTileY;
 
-    unsigned tilesFound; // the number of tiles found in the pattern
+    volatile unsigned tilesFound; // the number of tiles found in the pattern
     unsigned timesPlayedOnThisSize;
-    unsigned wrongTiles;      // the number of wrong tiles
+    volatile unsigned wrongTiles;      // the number of wrong tiles
 } Game;
 
 extern Game* GAME;

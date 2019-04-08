@@ -48,10 +48,10 @@ void drawBoard(int playersTurn) {
 
             // Highlight the selected square
             if (row == GAME->currentTileY && col == GAME->currentTileX) {
-                draw_line(xPos-1, yPos-1, xPos + squareSize + 1, yPos-1, 0xFF66);
-                draw_line(xPos-1, yPos + squareSize + 1, xPos + squareSize + 1, yPos + squareSize + 1, 0xFF66);
-                draw_line(xPos-1, yPos-1, xPos - 1, yPos + squareSize + 1, 0xFF66);
-                draw_line(xPos + squareSize + 1, yPos-1, xPos + squareSize + 1, yPos + squareSize + 1, 0xFF66);
+                draw_line(xPos-1, yPos-1, xPos + squareSize, yPos-1, 0xFF66);
+                draw_line(xPos-1, yPos + squareSize, xPos + squareSize, yPos + squareSize, 0xFF66);
+                draw_line(xPos-1, yPos-1, xPos - 1, yPos + squareSize, 0xFF66);
+                draw_line(xPos + squareSize, yPos-1, xPos + squareSize, yPos + squareSize, 0xFF66);
             }
 
             drawTile(xPos, yPos, squareSize, color);
@@ -75,10 +75,10 @@ void draw_board_background(void){
 //draws the tiles of the board, and their respective colors corresponding to status
 //starting from top left corner
 void drawTile(int x, int y, int size, short int color){
-    int row = x;
-    for(; row < x +size; row++){
-        int col = y;
-        for(; col < y +size; col ++){
+    int row = y;
+    for(; row < y +size; row++){
+        int col = x;
+        for(; col < x +size; col ++){
           plot_pixel(col, row, color);
         }
     }
@@ -187,12 +187,12 @@ void draw_text(int level, int lives){
   char* text_ptr = levels_text;
   int offset = (y << 7) + x;
   while (*(text_ptr)) {
-    *(0xC9000000 + offset) = *(text_ptr); // write to the character buffer
+    *(character_buffer + offset) = *(text_ptr); // write to the character buffer
     ++text_ptr;
     ++offset;
   }
   offset = (y << 7) + x + 7;
-  *(0xC9000000 + offset) = '0' + level;
+  *(character_buffer + offset) = '0' + level;
 
   y = 30;
   x = 1;
@@ -200,11 +200,11 @@ void draw_text(int level, int lives){
   text_ptr = lives_text;
   offset = (y << 7) + x;
   while (*(text_ptr)) {
-    *(0xC9000000 + offset) = *(text_ptr); // write to the character buffer
+    *(character_buffer + offset) = *(text_ptr); // write to the character buffer
     ++text_ptr;
     ++offset;
   }
   offset = (y << 7) + x + 7;
-  *(0xC9000000 + offset) = '0' + lives;
+  *(character_buffer + offset) = '0' + lives;
 
-},
+}

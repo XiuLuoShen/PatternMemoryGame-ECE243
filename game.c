@@ -25,7 +25,7 @@ void newLevel(unsigned level) {
     // Free the board
     freeBoard();
     // If level isn't being repeated, increment level and number of tiles to remember
-    if (GAME->level < level) {
+    if (GAME->level <= level) {
         GAME->level++;
         GAME->numOfTiles++;
         GAME->timesPlayedOnThisSize++;
@@ -35,6 +35,7 @@ void newLevel(unsigned level) {
         GAME->boardSize++;
         GAME->timesPlayedOnThisSize = 1;
     }
+
     GAME->tilesFound = 0;
     GAME->wrongTiles = 0;
     GAME->currentTileX = 0;
@@ -92,7 +93,7 @@ void selectTile(int row, int col) {
     if (GAME->selectedTiles[row][col] == 0) {
         if (GAME->board[row][col] == 1) {
             GAME->selectedTiles[row][col] = 1;
-            GAME->tilesFound++;
+            GAME->tilesFound += 1;
         }
         else {
             GAME->selectedTiles[row][col] = 2;
@@ -117,6 +118,9 @@ ClickResult checkBoard(void) {
             }
         }
     }
+    volatile int* ledr = (int *) 0xFF200000;
+    *ledr = GAME->tilesFound;
+
     if (correctTiles == GAME->numOfTiles){
         return PASS;
     }

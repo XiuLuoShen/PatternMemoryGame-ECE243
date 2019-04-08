@@ -106,7 +106,7 @@ void keyboardISR(void) {
     else if (keyByte2 == BREAK_CODE) {
         if (keyByte3 == ENTER_KEY) {
             if (!lost && started) {
-                selectTile(GAME->currentTileX, GAME->currentTileY);
+                selectTile(GAME->currentTileY, GAME->currentTileX);
             }
             else { // If game was lost, can restart by pressing enter
                 started = true;
