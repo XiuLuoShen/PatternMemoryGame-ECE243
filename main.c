@@ -12,13 +12,19 @@ void wait_for_vsync(void);
 volatile int pixel_buffer_start; // global variable from draw.h
 Game* GAME; // from game.h
 bool lost = false;
+bool started = false;   // For when the program is loaded the first time
+char keyByte1, keyByte2, keyByte3;  // The bytes from the keyboard
 
 int main(void) {
     volatile int* ledr = (int *) 0xFF200000;
 
+    keyByte1 = 0;
+    keyByte2 = 0;
+    keyByte3 = 0;
+
     // Allocate the memory for the game struct and initialize
     GAME = (Game*) malloc(sizeof(Game));
-    restartGame();
+    restartGame();  // Allocation of memory for the game
 
     disable_A9_interrupts(); // disable interrupts in the A9 processor
     set_A9_IRQ_stack(); // initialize the stack pointer for IRQ mode
@@ -39,7 +45,11 @@ int main(void) {
         // If statement to draw the pattern or the board
         drawBoard(playerTurn);
 
-        if (lost) {
+        // Draw text to start the game
+        if (started) {
+
+        }
+        else if (lost) {
             // Draw the lost/restart text
         }
 
@@ -47,6 +57,10 @@ int main(void) {
         wait_for_vsync(); // swap front and back buffers on VGA vertical sync
         pixel_buffer_start = *(pixel_ctrl_ptr + 1); // new back buffer
 
+        // If the game has not been started yet
+        // if (!started) {
+        //     continue;
+        // }
         // If the game has not been lost
         if (!lost) {
             // Check if pattern is being shown to player
@@ -59,6 +73,7 @@ int main(void) {
             if (GAME->tilesFound == GAME->numOfTiles) {
                 delayms(300);
                 newLevel(GAME->level + 1);
+                playerTurn = false;
             }
             // Check if level was failed
             else if (GAME->wrongTiles >= 3) {
@@ -67,11 +82,13 @@ int main(void) {
                 // Check if the game has been lost
                 if (GAME->lives == 0) {
                     lost = true;
+                    playerTurn = false;
                 }
                 // If not lost then try the level again
                 else {
                     newLevel(GAME->level);
                 }
+                playerTurn = false;
             }
         }
     }

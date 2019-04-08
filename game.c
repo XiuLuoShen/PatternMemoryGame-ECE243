@@ -58,6 +58,12 @@ void initializeBoard(unsigned boardSize, unsigned numOfTiles) {
 
     }
 
+    for (row = 0; row < boardSize; row++) {
+        for (int col = 0; col < boardSize; col++) {
+            GAME->selectedTiles[row][col] = 0;
+        }
+    }
+    
     // Set the random patterns
     int i = 0;
     for (; i < numOfTiles; i++) {

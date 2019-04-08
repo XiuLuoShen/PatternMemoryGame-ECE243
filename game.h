@@ -25,6 +25,7 @@ typedef struct {
 
 extern Game* GAME;
 extern bool playerTurn;
+extern bool started;
 extern bool lost;
 
 /**
