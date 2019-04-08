@@ -26,6 +26,7 @@ int main(void) {
     // Allocate the memory for the game struct and initialize
     GAME = (Game*) malloc(sizeof(Game));
     restartGame();  // Allocation of memory for the game
+    playerTurn = true;
 
     disable_A9_interrupts(); // disable interrupts in the A9 processor
     set_A9_IRQ_stack(); // initialize the stack pointer for IRQ mode
@@ -74,24 +75,23 @@ int main(void) {
             }
             // Check if  level was passed
             if (GAME->tilesFound >= GAME->numOfTiles) {
+                playerTurn = false;
                 delayms(300);
                 newLevel(GAME->level + 1);
-                playerTurn = false;
             }
             // Check if level was failed
             else if (GAME->wrongTiles >= 3) {
+                playerTurn = false;
                 delayms(300);
                 GAME->lives--;
                 // Check if the game has been lost
                 if (GAME->lives == 0) {
                     lost = true;
-                    playerTurn = false;
                 }
                 // If not lost then try the level again
                 else {
                     newLevel(GAME->level);
                 }
-                playerTurn = false;
             }
         }
     }

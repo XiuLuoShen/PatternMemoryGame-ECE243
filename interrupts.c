@@ -19,7 +19,7 @@ void configA9Timer(void) {
 
 // Delay using the timer
 void delayms(int ms) {
-    disable_A9_interrupts(); // disable interrupts in the A9 processor
+    // disable_A9_interrupts(); // disable interrupts in the A9 processor
 
     volatile int * timerPtr = (int *) 0xFFFEC600;
 
@@ -37,7 +37,7 @@ void delayms(int ms) {
     // Clear the interrupt flag
     *(timerPtr+3) = 0b1;
 
-    enable_A9_interrupts(); // enable interrupts in the A9 processor
+    // enable_A9_interrupts(); // enable interrupts in the A9 processor
 }
 
 // Configure PS2
@@ -105,8 +105,17 @@ void keyboardISR(void) {
     }
     else if (keyByte2 == BREAK_CODE) {
         if (keyByte3 == ENTER_KEY) {
-            if (!lost && started) {
-                selectTile(GAME->currentTileY, GAME->currentTileX);
+            // If it is at the very start of the game
+            if (!started) {
+                started = true;
+                playerTurn = false;
+                return;
+            }
+
+            if (!lost) {
+                if (playerTurn) {
+                    selectTile(GAME->currentTileY, GAME->currentTileX);
+                }
             }
             else { // If game was lost, can restart by pressing enter
                 started = true;
