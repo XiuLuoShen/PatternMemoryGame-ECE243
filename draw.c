@@ -226,6 +226,7 @@ void draw_game_over(){
     ++offset;
   }
 
+  y = 3;
   char* text_ptr = text_two;
   int offset = (y << 7) + x;
   while (*(text_ptr)) {
@@ -234,6 +235,7 @@ void draw_game_over(){
     ++offset;
   }
 
+  y = 4;
   char* text_ptr = text_three;
   int offset = (y << 7) + x;
   while (*(text_ptr)) {
@@ -251,7 +253,7 @@ void draw_game_start(){
 
   int y = 2;
   int x = 1;
-  
+
   char* text_ptr = text_one;
   int offset = (y << 7) + x;
   while (*(text_ptr)) {
@@ -260,6 +262,7 @@ void draw_game_start(){
     ++offset;
   }
 
+  y = 3;
   char* text_ptr = text_two;
   int offset = (y << 7) + x;
   while (*(text_ptr)) {
