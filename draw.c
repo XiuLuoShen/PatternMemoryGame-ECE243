@@ -176,9 +176,9 @@ int abs(int value) {
 //     }
 
 void draw_text(int level, int lives){
-  int * character_buffer = (int *) 0xC9000000;
-  char* levels_text = "Level \0";
-  char* lives_text = "Lives \0";
+  volatile char * character_buffer = (char *) 0xC9000000;
+  char* levels_text = "Level ";
+  char* lives_text = "Lives ";
 
 
   int y = 29;
@@ -194,8 +194,8 @@ void draw_text(int level, int lives){
   offset = (y << 7) + x + 7;
   *(character_buffer + offset) = '0' + level;
 
-  y = 30;
-  x = 1;
+  y = 32;
+  x = 2;
   //Writes lives
   text_ptr = lives_text;
   offset = (y << 7) + x;
