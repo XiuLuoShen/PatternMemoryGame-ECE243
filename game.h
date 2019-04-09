@@ -24,7 +24,7 @@ typedef struct {
 } Game;
 
 extern Game* GAME;
-extern bool playerTurn;
+extern volatile bool playerTurn;
 extern bool started;
 extern bool lost;
 

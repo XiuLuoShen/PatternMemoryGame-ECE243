@@ -12,13 +12,15 @@ void HEX_PS2(char, char, char);
 
 // Global variables
 volatile int pixel_buffer_start; // global variable from draw.h
+volatile bool playerTurn;
 Game* GAME; // from game.h
-bool lost = false;
-bool started = false;   // For when the program is loaded the first time
+bool lost;
+bool started;   // For when the program is loaded the first tim
 char keyByte1, keyByte2, keyByte3;  // The bytes from the keyboard
 
 int main(void) {
-
+	started = false;
+	lost = false;
     keyByte1 = 0;
     keyByte2 = 0;
     keyByte3 = 0;
@@ -27,6 +29,8 @@ int main(void) {
     GAME = (Game*) malloc(sizeof(Game));
     restartGame();  // Allocation of memory for the game
     playerTurn = true;
+    GAME->level = 0;
+
 
     disable_A9_interrupts(); // disable interrupts in the A9 processor
     set_A9_IRQ_stack(); // initialize the stack pointer for IRQ mode
@@ -36,6 +40,7 @@ int main(void) {
     // Configure VGA stuff
     volatile int * pixel_ctrl_ptr = (int *)0xFF203020;
     initializeBuffers();
+	clear_char_buff();
 
     enable_A9_interrupts(); // enable interrupts in the A9 processor
 
@@ -44,17 +49,19 @@ int main(void) {
         // Clear the screen
         clear_screen();
 
-        // If statement to draw the pattern or the board
-        drawBoard(playerTurn);
-
         // Draw text to start the game
-        if (started) {
-            GAME->level = 0;
+        if (!started) {
+			draw_game_start();
+			playerTurn = true;
         }
         else if (lost) {
             // Draw the lost/restart text
+			draw_game_over();
         }
         draw_text(GAME->level, GAME->lives);
+		
+		// If statement to draw the pattern or the board
+        drawBoard(playerTurn);
 
         // Draw the game board
         wait_for_vsync(); // swap front and back buffers on VGA vertical sync
@@ -63,7 +70,8 @@ int main(void) {
         HEX_PS2(keyByte1, keyByte2, keyByte3);
         // If the game has not been started yet
         if (!started) {
-            continue;
+            playerTurn = false;
+			continue;
         }
         // If the game has not been lost
         if (!lost) {

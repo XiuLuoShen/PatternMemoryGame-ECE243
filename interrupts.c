@@ -6,6 +6,7 @@
 #include "game.h"
 #include "keyboard_codes.h"
 #include "address_map_arm.h"
+#include "draw.h"
 
 // Configure timer
 void configA9Timer(void) {
@@ -109,6 +110,7 @@ void keyboardISR(void) {
             if (!started) {
                 started = true;
                 playerTurn = false;
+				clear_char_buff();
                 return;
             }
 
@@ -118,7 +120,6 @@ void keyboardISR(void) {
                 }
             }
             else { // If game was lost, can restart by pressing enter
-                started = true;
                 freeBoard();
                 restartGame();
             }

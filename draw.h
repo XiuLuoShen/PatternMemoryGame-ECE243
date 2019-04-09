@@ -26,6 +26,7 @@ void drawTile(int x, int y, int size, short int color);
 void plot_pixel(int x, int y, short int line_color);
 void clear_screen(void);
 
+void clear_char_buff(void);
 void draw_text(int level, int lives);
 
 void draw_game_over();

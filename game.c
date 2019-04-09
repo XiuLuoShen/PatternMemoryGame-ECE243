@@ -1,8 +1,7 @@
 #include <stdlib.h>
 
 #include "game.h"
-
-bool playerTurn;
+#include "draw.h"
 
 void restartGame(void) {
     // Free the board
@@ -26,7 +25,7 @@ void newLevel(unsigned level) {
     // Free the board
     freeBoard();
     // If level isn't being repeated, increment level and number of tiles to remember
-    if (GAME->level <= level) {
+    if (GAME->level < level) {
         GAME->level++;
         GAME->numOfTiles++;
         GAME->timesPlayedOnThisSize++;

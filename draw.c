@@ -190,6 +190,7 @@ void draw_text(int level, int lives){
     *(character_buffer + offset) = *(text_ptr); // write to the character buffer
     ++text_ptr;
     ++offset;
+  }
 
   if(level<10){
     offset = (y << 7) + x + 7;
@@ -236,8 +237,8 @@ void draw_game_over(){
   }
 
   y = 3;
-  char* text_ptr = text_two;
-  int offset = (y << 7) + x;
+  text_ptr = text_two;
+  offset = (y << 7) + x;
   while (*(text_ptr)) {
     *(character_buffer + offset) = *(text_ptr); // write to the character buffer
     ++text_ptr;
@@ -245,8 +246,8 @@ void draw_game_over(){
   }
 
   y = 4;
-  char* text_ptr = text_three;
-  int offset = (y << 7) + x;
+  text_ptr = text_three;
+  offset = (y << 7) + x;
   while (*(text_ptr)) {
     *(character_buffer + offset) = *(text_ptr); // write to the character buffer
     ++text_ptr;
@@ -255,7 +256,7 @@ void draw_game_over(){
 
 }
 
-void draw_game_start(){
+void draw_game_start() {
   volatile char * character_buffer = (char *) 0xC9000000;
   char* text_one = "Press enter";
   char* text_two = "To play";
@@ -272,8 +273,8 @@ void draw_game_start(){
   }
 
   y = 3;
-  char* text_ptr = text_two;
-  int offset = (y << 7) + x;
+  text_ptr = text_two;
+  offset = (y << 7) + x;
   while (*(text_ptr)) {
     *(character_buffer + offset) = *(text_ptr); // write to the character buffer
     ++text_ptr;
@@ -282,15 +283,17 @@ void draw_game_start(){
 
 }
 
-void clear_char_buff(){
+void clear_char_buff() {
   volatile char * character_buffer = (char *) 0xC9000000;
   int row = 0;
-  int col = 0;
+  
   int offset = 0;
   for(;row < 59; row++){
-    for(;col <79; col ++){
-       offset = (row << 7) + x;
+	 int col = 0;
+    for(;col < 79; col ++){
+       offset = (row << 7) + col;
        *(character_buffer + offset) = ' ';
     }
   }
+  return;
 }
