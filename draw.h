@@ -28,5 +28,7 @@ void clear_screen(void);
 
 void draw_text(int level, int lives);
 
+void draw_game_over();
 
+void draw_game_start();
 #endif // DRAW_H_
