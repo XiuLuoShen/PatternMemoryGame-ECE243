@@ -190,9 +190,18 @@ void draw_text(int level, int lives){
     *(character_buffer + offset) = *(text_ptr); // write to the character buffer
     ++text_ptr;
     ++offset;
+
+  if(level<10){
+    offset = (y << 7) + x + 7;
+    *(character_buffer + offset) = '0' + level;
   }
-  offset = (y << 7) + x + 7;
-  *(character_buffer + offset) = '0' + level;
+  else{
+    offset = (y << 7) + x + 7;
+    *(character_buffer + offset) = '0' + level / 10;
+    offset = (y << 7) + x + 8;
+    *(character_buffer + offset) = '0' + level % 10;
+  }
+
 
   y = 32;
   x = 1;

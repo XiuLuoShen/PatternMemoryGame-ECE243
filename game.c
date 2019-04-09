@@ -6,6 +6,7 @@ bool playerTurn;
 
 void restartGame(void) {
     // Free the board
+    clear_char_buff();
     GAME->timesPlayedOnThisSize = 1;
     GAME->tilesFound = 0;
     GAME->level = 1;
