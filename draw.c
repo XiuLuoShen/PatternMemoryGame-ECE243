@@ -17,7 +17,7 @@ void drawBoard(int playersTurn) {
     int row = 0;
     int yPos = borderWidth;
     for (; row < size; row++) {
-        int xPos = 39 + borderWidth;
+        int xPos = 79 + borderWidth;
         int col = 0;
         for (; col < size; col++) {
             //color choices: the tile is inactive
@@ -63,8 +63,8 @@ void drawBoard(int playersTurn) {
 
 //draws a 240x240 blue background in the center of the screen
 void draw_board_background(void){
-  int x = 39;
-  for (; x < 280; x++) {
+  int x = 79;
+  for (; x < 320; x++) {
       int y = 0;
       for (; y < 240; y++) {
           plot_pixel(x, y,backgroundColor);
@@ -271,4 +271,17 @@ void draw_game_start(){
     ++offset;
   }
 
+}
+
+void clear_char_buff(){
+  volatile char * character_buffer = (char *) 0xC9000000;
+  int row = 0;
+  int col = 0;
+  int offset = 0;
+  for(;row < 59; row++){
+    for(;col <79; col ++){
+       offset = (row << 7) + x;
+       *(character_buffer + offset) = ' ';
+    }
+  }
 }
